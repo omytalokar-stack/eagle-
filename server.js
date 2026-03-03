@@ -11,7 +11,7 @@ import { GoogleGenAI } from '@google/genai';
 import webpush from 'web-push';
 import { Server } from 'socket.io';
 
-// Import passport configuration
+// Import passport configuration (Google OAuth removed; serialize/deserialize only)
 import './passport-config.js';
 
 // Import models
@@ -20,7 +20,17 @@ import User from './models/User.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// warn about missing critical env vars but don't crash
+if (!process.env.SESSION_SECRET) {
+  console.warn('⚠️ SESSION_SECRET is not set; using default insecure secret');
+  process.env.SESSION_SECRET = 'defaultsecret';
+}
+if (!process.env.MONGODB_URI && !process.env.MONGO_URI) {
+  console.warn('⚠️ No MongoDB URI provided in env; server will attempt to start but database calls will fail.');
+}
+
 
 // Initialize Gemini AI
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY });
@@ -157,27 +167,28 @@ app.post('/api/push/notify', isAdmin, express.json(), async (req, res) => {
 });
 
 // ============ AUTH ROUTES ============
-app.get('/api/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-
-app.get('/api/auth/google/callback',
-  passport.authenticate('google', { 
-    failureRedirect: `${FRONTEND_URL}?login=failed`,
-    session: true
-  }),
-  (req, res) => {
-    try {
-      if (req.user && req.user.email === process.env.ADMIN_EMAIL) {
-        req.user.isAdmin = true;
-      }
-      res.redirect(FRONTEND_URL);
-    } catch (error) {
-      console.error('Callback redirect error:', error);
-      res.redirect(`${FRONTEND_URL}?login=error`);
-    }
-  }
-);
+// Google OAuth routes removed (using email/password auth later)
+// app.get('/api/auth/google',
+//   passport.authenticate('google', { scope: ['profile', 'email'] })
+// );
+//
+// app.get('/api/auth/google/callback',
+//   passport.authenticate('google', { 
+//     failureRedirect: `${FRONTEND_URL}?login=failed`,
+//     session: true
+//   }),
+//   (req, res) => {
+//     try {
+//       if (req.user && req.user.email === process.env.ADMIN_EMAIL) {
+//         req.user.isAdmin = true;
+//       }
+//       res.redirect(FRONTEND_URL);
+//     } catch (error) {
+//       console.error('Callback redirect error:', error);
+//       res.redirect(`${FRONTEND_URL}?login=error`);
+//     }
+//   }
+// );
 
 app.get('/api/auth/logout', (req, res) => {
   req.logout((err) => {
@@ -372,11 +383,12 @@ app.use((err, req, res, next) => {
 const start = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
-    if (!mongoUri) {
-      throw new Error('MongoDB URI not found in environment variables');
+    if (mongoUri) {
+      await mongoose.connect(mongoUri);
+      console.log('✅ MongoDB Connected Successfully');
+    } else {
+      console.warn('⚠️ Skipping MongoDB connection because URI is missing');
     }
-    await mongoose.connect(mongoUri);
-    console.log('✅ MongoDB Connected Successfully');
     
     const serverPort = PORT;
     const server = app.listen(serverPort, () => {
@@ -465,5 +477,10 @@ const start = async () => {
   }
 };
 
-start();
+// ensure start is defined then call
+if (typeof start === 'function') {
+  start();
+} else {
+  console.error('start() is not defined');
+}
 
