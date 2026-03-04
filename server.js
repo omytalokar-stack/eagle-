@@ -361,6 +361,43 @@ app.post('/api/manual-chat', async (req, res) => {
   }
 });
 
+// ============ SETTINGS & PROJECTS (IN-MEMORY FOR DEMO) ============
+let appSettings = {
+  site_status: 'Available',
+  is_manual_chat: 'false'
+};
+
+let projectList = [];
+
+// public getters
+app.get('/api/settings', (req, res) => {
+  res.json(appSettings);
+});
+
+app.get('/api/projects', (req, res) => {
+  res.json(projectList);
+});
+
+// admin-modifiable endpoints (no auth required for now, front-end handles its own key check)
+app.post('/api/settings', express.json(), (req, res) => {
+  const incoming = req.body.settings;
+  if (incoming && typeof incoming === 'object') {
+    appSettings = { ...appSettings, ...incoming };
+    return res.json({ success: true, settings: appSettings });
+  }
+  res.status(400).json({ error: 'Invalid settings payload' });
+});
+
+app.post('/api/projects', express.json(), (req, res) => {
+  const proj = req.body;
+  if (proj && typeof proj === 'object') {
+    proj.id = proj.id || Date.now().toString();
+    projectList.unshift(proj);
+    return res.json({ success: true, id: proj.id });
+  }
+  res.status(400).json({ error: 'Invalid project payload' });
+});
+
 // ============ UTILITY ROUTES ============
 app.get('/favicon.ico', (req, res) => {
   res.status(204).end();
