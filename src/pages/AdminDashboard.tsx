@@ -55,7 +55,7 @@ export const AdminDashboard = () => {
       fetch(`${API_BASE}/api/projects`).then(res => res.json()).then(setProjects);
       fetch(`${API_BASE}/api/inquiries`).then(res => res.json()).then(setInquiries);
       fetch(`${API_BASE}/api/settings`).then(res => res.json()).then(setSettings);
-      fetch('/api/chat/sessions').then(res => res.json()).then(setChatSessions);
+      fetch(`${API_BASE}/api/chat/sessions`).then(res => res.json()).then(setChatSessions);
 
       // Socket setup
       socketRef.current = io();
@@ -101,7 +101,7 @@ export const AdminDashboard = () => {
   const selectSession = (sessionId: string) => {
     setActiveSession(sessionId);
     socketRef.current?.emit('join_session', sessionId);
-    fetch(`/api/chat/${sessionId}`).then(res => res.json()).then(setMessages);
+    fetch(`${API_BASE}/api/chat/${sessionId}`).then(res => res.json()).then(setMessages);
   };
 
   const sendManualMessage = (e: React.FormEvent) => {
