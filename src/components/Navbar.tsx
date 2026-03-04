@@ -24,7 +24,7 @@ export const Navbar = () => {
   React.useEffect(() => {
     const checkStatus = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/auth/status', { withCredentials: true });
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/status`, { withCredentials: true });
         setIsLoggedIn(Boolean(data?.isLoggedIn));
         setUserLocal(data?.user || null);
         setIsAdmin(Boolean(data?.isAdmin));
@@ -44,7 +44,7 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('http://localhost:5000/api/auth/logout', { withCredentials: true });
+      await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/logout`, { withCredentials: true });
       setIsLoggedIn(false);
       setUserLocal(null);
       setIsAdmin(false);

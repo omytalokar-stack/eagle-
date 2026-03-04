@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { ArrowRight, Minimize } from 'lucide-react';
+import { ArrowRight, Minimize, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Hero = () => {
@@ -104,6 +104,41 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-black">
+      {/* Floating Chat Button Portal */}
+      <Link to="/chat-live" className="fixed bottom-12 right-12 z-50">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          whileHover={{ scale: 1.15, boxShadow: "0 0 40px rgba(204, 255, 0, 1)" }}
+          whileTap={{ scale: 0.95 }}
+          className="relative"
+        >
+          <motion.div
+            animate={{ 
+              boxShadow: [
+                "0 0 20px rgba(204, 255, 0, 0.4)",
+                "0 0 40px rgba(204, 255, 0, 0.8)",
+                "0 0 20px rgba(204, 255, 0, 0.4)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-16 h-16 rounded-full bg-[#CCFF00] flex items-center justify-center cursor-pointer shadow-2xl"
+          >
+            <MessageCircle size={28} className="text-black" strokeWidth={2.5} />
+          </motion.div>
+          
+          {/* Pulsing ring effect */}
+          <motion.div
+            animate={{ 
+              scale: [1, 1.4],
+              opacity: [1, 0]
+            }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute inset-0 border-2 border-[#CCFF00] rounded-full"
+          />
+        </motion.div>
+      </Link>
       {/* Starfield Background */}
       <div className="starfield z-0">
         {stars.map(star => (

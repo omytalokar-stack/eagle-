@@ -25,7 +25,7 @@ export const AdminDashboard = () => {
     e.preventDefault();
     // Fetch admin secret key from backend
     try {
-      const response = await fetch('http://localhost:5000/api/admin/secret-key', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/admin/secret-key`, {
         credentials: 'include'
       });
       const data = await response.json();

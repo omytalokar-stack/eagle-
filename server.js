@@ -20,7 +20,7 @@ import User from './models/User.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://your-vercel-frontend.vercel.app';
 
 // warn about missing critical env vars but don't crash
 if (!process.env.SESSION_SECRET) {
@@ -61,7 +61,12 @@ const upload = multer({
 
 // ============ MIDDLEWARE SETUP (BEFORE START) ============
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: (origin, cb) => {
+    // Allow requests from configured frontend or localhost during development
+    const allowed = [FRONTEND_URL, 'http://localhost:3000'];
+    if (!origin || allowed.indexOf(origin) !== -1) return cb(null, true);
+    return cb(new Error('CORS not allowed'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -384,12 +389,17 @@ const start = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
     if (mongoUri) {
-      await mongoose.connect(mongoUri);
-      console.log('✅ MongoDB Connected Successfully');
+      try {
+        await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log('✅ MongoDB Connected Successfully');
+      } catch (dbErr) {
+        console.error('⚠️ MongoDB connection failed:', dbErr.message);
+        console.warn('Continuing to run server without DB connection (degraded mode)');
+      }
     } else {
       console.warn('⚠️ Skipping MongoDB connection because URI is missing');
     }
-    
+
     const serverPort = PORT;
     const server = app.listen(serverPort, () => {
       console.log(`🚀 Server running on port ${serverPort}`);
@@ -399,7 +409,11 @@ const start = async () => {
     // Initialize Socket.io with CORS
     const io = new Server(server, {
       cors: {
-        origin: FRONTEND_URL,
+        origin: (origin, cb) => {
+          const allowed = [FRONTEND_URL, 'http://localhost:3000'];
+          if (!origin || allowed.indexOf(origin) !== -1) return cb(null, true);
+          return cb(new Error('Socket CORS not allowed'), false);
+        },
         credentials: true,
         methods: ['GET', 'POST']
       }

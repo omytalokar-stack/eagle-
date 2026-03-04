@@ -26,7 +26,7 @@ export const ChatLive = () => {
   // Initialize Socket.io connection
   React.useEffect(() => {
     try {
-      socketRef.current = io('http://localhost:5000', { withCredentials: true });
+      socketRef.current = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000', { withCredentials: true });
       socketRef.current.emit('join_session', sessionId);
 
       socketRef.current.on('new_message', (msg: any) => {
@@ -60,7 +60,7 @@ export const ChatLive = () => {
 
   // Load chat history on mount
   React.useEffect(() => {
-    fetch(`http://localhost:5000/api/chat/${sessionId}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/chat/${sessionId}`)
       .then(res => res.json())
       .then(data => setMessages(data))
       .catch(() => {});
@@ -148,9 +148,8 @@ export const ChatLive = () => {
     // Send message via Socket.io
     socketRef.current?.emit('send_message', userMsg);
 
-    // Also send to backend for storage
     try {
-      await fetch('http://localhost:5000/api/manual-chat', {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/manual-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
