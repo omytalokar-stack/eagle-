@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
 import { useAuth } from '@/src/contexts/AuthContext';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -99,7 +101,7 @@ export const BookingPage = () => {
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/mission-brief`, {
+      const res = await fetch(`${API_BASE}/api/mission-brief`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

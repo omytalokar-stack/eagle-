@@ -20,7 +20,7 @@ import User from './models/User.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://your-vercel-frontend.vercel.app';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://eagle-high-end-digital-solutions.vercel.app';
 
 // warn about missing critical env vars but don't crash
 if (!process.env.SESSION_SECRET) {
@@ -61,15 +61,10 @@ const upload = multer({
 
 // ============ MIDDLEWARE SETUP (BEFORE START) ============
 app.use(cors({
-  origin: (origin, cb) => {
-    // Allow requests from configured frontend or localhost during development
-    const allowed = [FRONTEND_URL, 'http://localhost:3000'];
-    if (!origin || allowed.indexOf(origin) !== -1) return cb(null, true);
-    return cb(new Error('CORS not allowed'), false);
-  },
+  origin: ['https://eagle-high-end-digital-solutions.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -409,11 +404,7 @@ const start = async () => {
     // Initialize Socket.io with CORS
     const io = new Server(server, {
       cors: {
-        origin: (origin, cb) => {
-          const allowed = [FRONTEND_URL, 'http://localhost:3000'];
-          if (!origin || allowed.indexOf(origin) !== -1) return cb(null, true);
-          return cb(new Error('Socket CORS not allowed'), false);
-        },
+        origin: ['https://eagle-high-end-digital-solutions.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
         credentials: true,
         methods: ['GET', 'POST']
       }

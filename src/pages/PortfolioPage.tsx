@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Maximize, Minimize } from 'lucide-react';
 import { BackButton } from '@/src/components/BackButton';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const PortfolioPage = () => {
   const [projects, setProjects] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -60,7 +62,7 @@ export const PortfolioPage = () => {
   }, []);
 
   React.useEffect(() => {
-    fetch('/api/projects')
+    fetch(`${API_BASE}/api/projects`)
       .then(res => res.json())
       .then(data => {
         setProjects(data);

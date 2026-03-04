@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
 import { io } from 'socket.io-client';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const ChatLive = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = React.useState<any[]>([]);
@@ -26,7 +28,7 @@ export const ChatLive = () => {
   // Initialize Socket.io connection
   React.useEffect(() => {
     try {
-      socketRef.current = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000', { withCredentials: true });
+      socketRef.current = io(API_BASE, { withCredentials: true });
       socketRef.current.emit('join_session', sessionId);
 
       socketRef.current.on('new_message', (msg: any) => {
@@ -60,7 +62,7 @@ export const ChatLive = () => {
 
   // Load chat history on mount
   React.useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/chat/${sessionId}`)
+    fetch(`${API_BASE}/api/chat/${sessionId}`)
       .then(res => res.json())
       .then(data => setMessages(data))
       .catch(() => {});
@@ -116,14 +118,14 @@ export const ChatLive = () => {
 
   const subscribeForPush = async (reg: ServiceWorkerRegistration) => {
     try {
-      const r = await fetch('/api/vapid-public-key');
+      const r = await fetch(`${API_BASE}/api/vapid-public-key`);
       const { publicKey } = await r.json();
       if (!publicKey) return;
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
-      await fetch('/api/push/subscribe', {
+      await fetch(`${API_BASE}/api/push/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sub)
@@ -149,7 +151,7 @@ export const ChatLive = () => {
     socketRef.current?.emit('send_message', userMsg);
 
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/manual-chat`, {
+      await fetch(`${API_BASE}/api/manual-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

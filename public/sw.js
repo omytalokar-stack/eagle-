@@ -37,10 +37,34 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+  const url = new URL(req.url);
   
-  // Skip non-GET requests (API calls handled separately)
+  // Skip POST/PUT/DELETE requests - don't cache
   if (req.method !== 'GET') {
-    return event.respondWith(fetch(req));
+    return event.respondWith(fetch(req).catch(() => {
+      if (req.method === 'POST' && url.hostname === 'eagle-cr29.onrender.com') {
+        return new Response(JSON.stringify({ error: 'Offline - cannot submit' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      throw new Error('Network error');
+    }));
+  }
+
+  // Skip API calls - network first
+  if (url.hostname === 'eagle-cr29.onrender.com' || url.hostname === 'eagle-cr29.onrender.com:443') {
+    return event.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then(c => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
   }
 
   // Cache-first strategy for app shell and assets

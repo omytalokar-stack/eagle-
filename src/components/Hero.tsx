@@ -3,6 +3,8 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'fram
 import { ArrowRight, Minimize, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const Hero = () => {
   const [settings, setSettings] = React.useState<any>({});
   const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -86,7 +88,7 @@ export const Hero = () => {
   }, []);
 
   React.useEffect(() => {
-    fetch('/api/settings')
+    fetch(`${API_BASE}/api/settings`)
       .then(res => res.json())
       .then(setSettings);
   }, []);

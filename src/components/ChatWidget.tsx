@@ -23,7 +23,7 @@ export const ChatWidget = () => {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           whileHover={{ scale: 1.12 }}
-          className="chat-button z-50 relative flex items-center justify-center shadow-lg"
+          className="chat-button z-50 relative flex items-center justify-center shadow-lg bg-[#CCFF00] text-black w-14 h-14 rounded-full"
           title="Open direct chat with Om Talokar"
         >
           {/* Hover label */}

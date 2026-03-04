@@ -5,6 +5,8 @@ import { cn } from '@/src/lib/utils';
 import { io } from 'socket.io-client';
 import { BackButton } from '@/src/components/BackButton';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = React.useState('portfolio');
   const [projects, setProjects] = React.useState<any[]>([]);
@@ -25,7 +27,7 @@ export const AdminDashboard = () => {
     e.preventDefault();
     // Fetch admin secret key from backend
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/admin/secret-key`, {
+      const response = await fetch(`${API_BASE}/api/admin/secret-key`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -50,9 +52,9 @@ export const AdminDashboard = () => {
 
   React.useEffect(() => {
     if (isAuthorized) {
-      fetch('/api/projects').then(res => res.json()).then(setProjects);
-      fetch('/api/inquiries').then(res => res.json()).then(setInquiries);
-      fetch('/api/settings').then(res => res.json()).then(setSettings);
+      fetch(`${API_BASE}/api/projects`).then(res => res.json()).then(setProjects);
+      fetch(`${API_BASE}/api/inquiries`).then(res => res.json()).then(setInquiries);
+      fetch(`${API_BASE}/api/settings`).then(res => res.json()).then(setSettings);
       fetch('/api/chat/sessions').then(res => res.json()).then(setChatSessions);
 
       // Socket setup
@@ -66,7 +68,7 @@ export const AdminDashboard = () => {
 
       socketRef.current.on('admin_notification', (notif: any) => {
         if (notif.type === 'chat') {
-          fetch('/api/chat/sessions').then(res => res.json()).then(setChatSessions);
+          fetch(`${API_BASE}/api/chat/sessions`).then(res => res.json()).then(setChatSessions);
         }
       });
 
@@ -77,7 +79,7 @@ export const AdminDashboard = () => {
   const toggleStatus = async () => {
     const newStatus = settings.site_status === 'Available' ? 'Busy' : 'Available';
     const newSettings = { ...settings, site_status: newStatus };
-    await fetch('/api/settings', {
+    await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ settings: newSettings }),
@@ -88,7 +90,7 @@ export const AdminDashboard = () => {
   const toggleManualChat = async () => {
     const newVal = settings.is_manual_chat === 'true' ? 'false' : 'true';
     const newSettings = { ...settings, is_manual_chat: newVal };
-    await fetch('/api/settings', {
+    await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ settings: newSettings }),
@@ -117,7 +119,7 @@ export const AdminDashboard = () => {
     setChatInput('');
     // Trigger web-push to notify subscriber browsers that admin replied
     try {
-      fetch('/api/push/notify', {
+      fetch(`${API_BASE}/api/push/notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -134,7 +136,7 @@ export const AdminDashboard = () => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     
-    const res = await fetch('/api/projects', {
+    const res = await fetch(`${API_BASE}/api/projects`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -152,7 +154,7 @@ export const AdminDashboard = () => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     
-    const res = await fetch('/api/settings', {
+    const res = await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ settings: { ...settings, ...data } }),
