@@ -95,13 +95,14 @@ self.addEventListener('fetch', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
+  const defaultIcon = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000000' width='192' height='192'/><text y='140' font-size='150' font-family='system-ui' text-anchor='middle' x='96' fill='%23CCFF00'>🦅</text></svg>";
   let payload = { 
     title: '🦅 EAGLE',
     body: 'You have a new message',
     url: '/',
     tag: 'eagle-push',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png'
+    icon: defaultIcon,
+    badge: defaultIcon
   };
   
   try {
@@ -118,8 +119,8 @@ self.addEventListener('push', (event) => {
     tag: payload.tag || 'eagle-push',
     renotify: true,
     requireInteraction: false,
-    icon: payload.icon || '/icons/icon-192.png',
-    badge: payload.badge || '/icons/icon-192.png',
+    icon: payload.icon || defaultIcon,
+    badge: payload.badge || defaultIcon,
     vibrate: [200, 100, 200],
     dir: 'ltr',
     lang: 'en-US'

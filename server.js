@@ -167,28 +167,27 @@ app.post('/api/push/notify', isAdmin, express.json(), async (req, res) => {
 });
 
 // ============ AUTH ROUTES ============
-// Google OAuth routes removed (using email/password auth later)
-// app.get('/api/auth/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] })
-// );
-//
-// app.get('/api/auth/google/callback',
-//   passport.authenticate('google', { 
-//     failureRedirect: `${FRONTEND_URL}?login=failed`,
-//     session: true
-//   }),
-//   (req, res) => {
-//     try {
-//       if (req.user && req.user.email === process.env.ADMIN_EMAIL) {
-//         req.user.isAdmin = true;
-//       }
-//       res.redirect(FRONTEND_URL);
-//     } catch (error) {
-//       console.error('Callback redirect error:', error);
-//       res.redirect(`${FRONTEND_URL}?login=error`);
-//     }
-//   }
-// );
+app.get('/api/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/api/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: `${FRONTEND_URL}?login=failed`,
+    session: true
+  }),
+  (req, res) => {
+    try {
+      if (req.user && req.user.email === process.env.ADMIN_EMAIL) {
+        req.user.isAdmin = true;
+      }
+      res.redirect(FRONTEND_URL);
+    } catch (error) {
+      console.error('Callback redirect error:', error);
+      res.redirect(`${FRONTEND_URL}?login=error`);
+    }
+  }
+);
 
 app.get('/api/auth/logout', (req, res) => {
   req.logout((err) => {
